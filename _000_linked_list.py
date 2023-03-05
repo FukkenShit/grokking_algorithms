@@ -93,6 +93,9 @@ class LinkedList:
         self.size -= 1
         return node.value
 
+    def __delitem__(self, index):
+        self.pop(index)
+
     def __getitem__(self, index):
         index = self._prepare_index(index)
         node = self._get_node_by_index(index)
@@ -122,15 +125,16 @@ class LinkedList:
         return self.size
 
 
-lst = LinkedList()
+if __name__ == '__main__':
+    lst = LinkedList()
 
-for i in range(10):
-    print(i)
-    lst.append(i)
+    for i in range(10):
+        print(i)
+        lst.append(i)
 
-for i in lst:
-    print(i)
-print(lst)
+    for i in lst:
+        print(i)
+    print(lst)
 
-for i in range(lst.size):
-    print(lst.pop())
+    for i in range(lst.size):
+        print(lst.pop())
