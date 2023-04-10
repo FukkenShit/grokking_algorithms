@@ -18,6 +18,8 @@ from _000_linked_list import LinkedList
 DEFAULT_ARRAY_SIZE = 50
 ARRAY_EXTENDING_THRESHOLD_RATIO = 0.7
 ARRAY_EXTENDING_FACTOR = 2
+ARRAY_REDUCING_THRESHOLD_RATIO = 0.2
+ARRAY_REDUCING_DENOMINATOR = 2
 KEY_ERROR_MESSAGE = 'No such key:{key}'
 
 
@@ -59,30 +61,39 @@ class HashMap(MutableMapping):
     def __init__(self):
         self._init_array()
 
-    def __setitem__(self, key: Hashable, value: Any) -> None:
+    def _set_item(self, key: Hashable, value: Any) -> None:
         item = HashMapItem(key, value)
         index, current_entry = self._get_entry_by_key(key)
         if current_entry:
             current_entry.add_item(item)
         else:
             self.array[index] = HashMapLinkedList((item,))
-        self._extend_array()
 
-    def __delitem__(self, key: Hashable) -> None:
+    def __setitem__(self, key: Hashable, value: Any) -> None:
+        self._set_item(key, value)
+        self._update_array_length()
+
+    def _del_item(self, key: Hashable) -> None:
         index, current_entry = self._get_entry_by_key(key)
         if not current_entry:
             raise KeyError(KEY_ERROR_MESSAGE.format(key=key))
         current_entry.delete_item_by_key(key)
         if not current_entry:
             self.array[index] = None
-        self._reduce_array()
 
-    def __getitem__(self, key: Hashable) -> Any:
+    def __delitem__(self, key: Hashable) -> None:
+        self._del_item(key)
+        self._update_array_length()
+
+    def _get_item(self, key: Hashable) -> Any:
         _, current_entry = self._get_entry_by_key(key)
         item = current_entry.find_item_by_key(key) if current_entry else None
         if item is None:
             raise KeyError(KEY_ERROR_MESSAGE.format(key=key))
         return item.value
+
+    def __getitem__(self, key: Hashable) -> Any:
+        return self._get_item(key)
 
     def __len__(self) -> int:
         return len(self.keys())
@@ -117,21 +128,47 @@ class HashMap(MutableMapping):
         index = hash(key) % len(self.array)
         return index, self.array[index]
 
-    def _extend_array(self):
+    def _update_array_length(self):
+        need_to_update = False
         current_array_len = len(self.array)
-        if len(self) >= current_array_len * ARRAY_EXTENDING_THRESHOLD_RATIO:
-            items = [item for item in self.items()]
-            self._init_array(current_array_len * ARRAY_EXTENDING_FACTOR)
-            for k, v in items:
-                self[k] = v
+        current_ratio = len(self) / current_array_len
 
-    def _reduce_array(self):
-        ...
+        if current_ratio >= ARRAY_EXTENDING_THRESHOLD_RATIO:
+            need_to_update = True
+            new_array_len = current_array_len * ARRAY_EXTENDING_FACTOR
+        elif current_ratio <= ARRAY_REDUCING_THRESHOLD_RATIO and current_array_len > DEFAULT_ARRAY_SIZE:
+            need_to_update = True
+            new_array_len = current_array_len // ARRAY_REDUCING_DENOMINATOR
+
+        if need_to_update:
+            items = [item for item in self.items()]
+            self._init_array(new_array_len)
+            for k, v in items:
+                self._set_item(k,v)
+
 
     def print_internals(self):
         print(f'{len(self.array)=}')
-        for i, entry in enumerate(self.array):
-            if entry:
-                print(i)
-                for j, item in enumerate(entry):
-                    print(f'    {j}. {item.key}: {item.value}')
+        # for i, entry in enumerate(self.array):
+        #     if entry:
+        #         print(i)
+        #         for j, item in enumerate(entry):
+        #             print(f'    {j}. {item.key}: {item.value}')
+
+
+a = HashMap()
+
+for i in range(400):
+    print(i)
+    a[i] = i
+    print(f"{len(a)=}")
+    a.print_internals()
+
+for key, value in a.items():
+    print(f"{key=}, {value=}")
+
+for i in range(400):
+    print(i)
+    del a[i]
+    print(f"{len(a)=}")
+    a.print_internals()
