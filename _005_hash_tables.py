@@ -101,6 +101,10 @@ class HashMap(MutableMapping):
     def __iter__(self) -> Iterator:
         yield from self.keys()
 
+    def __repr__(self):
+        key_value_pairs = ", ".join(f"{key!r}: {value!r}" for key, value in self.items())
+        return f'{self.__class__.__name__} {{{key_value_pairs}}}'
+
     def keys(self) -> set:
         keys = set()
         for entry in self.array:
