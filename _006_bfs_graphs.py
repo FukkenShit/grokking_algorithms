@@ -72,6 +72,7 @@ def is_person_a_mango_seller2(person: Person2) -> bool:
 def is_last_char_of_name_a_digit2(person: Person2) -> bool:
     return person.name[-1].isdigit()
 
+
 def is_first_char_of_name_a_digit2(person: Person2) -> bool:
     return person.name[0].isdigit()
 
