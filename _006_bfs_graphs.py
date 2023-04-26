@@ -72,6 +72,9 @@ def is_person_a_mango_seller2(person: Person2) -> bool:
 def is_last_char_of_name_a_digit2(person: Person2) -> bool:
     return person.name[-1].isdigit()
 
+def is_first_char_of_name_a_digit2(person: Person2) -> bool:
+    return person.name[0].isdigit()
+
 
 def find_closest_mango_seller2(person: Person2, *, key=is_person_a_mango_seller2) -> Optional[Person2]:
     """Another approach where each node stores related nodes as list in its `friends` attribute."""
@@ -107,9 +110,11 @@ def main2() -> None:
     meat_seller.friends.extend([mango_seller3, me])
 
     mango_seller = find_closest_mango_seller2(me)
-    print(mango_seller.name if mango_seller else None)
+    print(mango_seller and mango_seller.name)
     mango_seller = find_closest_mango_seller2(me, key=is_last_char_of_name_a_digit2)
-    print(mango_seller.name if mango_seller else None)
+    print(mango_seller and mango_seller.name)
+    mango_seller = find_closest_mango_seller2(me, key=is_first_char_of_name_a_digit2)
+    print(mango_seller and mango_seller.name)
 
 
 if __name__ == '__main__':
